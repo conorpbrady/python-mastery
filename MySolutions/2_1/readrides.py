@@ -1,5 +1,24 @@
 # readrides.py
 import csv
+from collections import namedtuple
+
+class Row:
+        def __init__(self, route, date, daytype, rides):
+            self.route = route
+            self.date = date
+            self.daytype = daytype
+            self.rides = rides
+
+class RowSlots:
+        __slots__ = ['route', 'date', 'daytype', 'rides']
+        def __init__(self, route, date, daytype, rides):
+            self.route = route
+            self.date = date
+            self.daytype = daytype
+            self.rides = rides
+
+RowTuple = namedtuple('Row', ['route', 'date', 'daytype', 'rides'])
+
 def read_rides_as_tuples(filename):
     '''
     Read the bus ride data as a string of tuples'''
@@ -31,6 +50,37 @@ def read_rides_as_dict(filename):
                     }
             records.append(obj)
     return records
+
+def read_rides_as_class(filename):
+    records = []
+    with open(filename) as f:
+        rows = csv.reader(f)
+        next(rows)
+        for row in rows:
+            row_c = Row(row[0], row[1], row[2], row[3])
+            records.append(row_c)
+    return records
+
+def read_rides_as_named_tuples(filename):
+    records = []
+    with open(filename) as f:
+        rows = csv.reader(f)
+        next(rows)
+        for row in rows:
+            row_t = RowTuple(row[0], row[1], row[2], row[3])
+            records.append(row_t)
+    return records
+
+def read_rides_as_class_slots(filename):
+    records = []
+    with open(filename) as f:
+        rows = csv.reader(f)
+        next(rows)
+        for row in rows:
+            row_c = RowSlots(row[0], row[1], row[2], row[3])
+            records.append(row_c)
+    return records
+
 if __name__  == '__main__':
     import tracemalloc
     tracemalloc.start()
@@ -39,3 +89,12 @@ if __name__  == '__main__':
     tracemalloc.clear_traces()
     rows = read_rides_as_dict('../../Data/ctabus.csv')
     print('Dict | Memory Use: Current %d, Peak %d' % tracemalloc.get_traced_memory())
+    tracemalloc.clear_traces()
+    rows = read_rides_as_class('../../Data/ctabus.csv')
+    print('Class | Memory Use: Current %d, Peak %d' % tracemalloc.get_traced_memory())
+    tracemalloc.clear_traces()
+    rows = read_rides_as_named_tuples('../../Data/ctabus.csv')
+    print('Named Tuple | Memory Use: Current %d, Peak %d' % tracemalloc.get_traced_memory())
+    tracemalloc.clear_traces()
+    rows = read_rides_as_class_slots('../../Data/ctabus.csv')
+    print('Class Slots | Memory Use: Current %d, Peak %d' % tracemalloc.get_traced_memory())
